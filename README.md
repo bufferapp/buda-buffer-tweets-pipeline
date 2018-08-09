@@ -1,7 +1,12 @@
-# buda-buffer-tweets-pipeline
+# Buffer Tweets Data Pipeline
 
-Data pipeline that grabs tweets in real time, publishes them to PubSub, processes the data using Dataflow and saves them to BigQuery.
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
+This repository contains code and resources for the Buffer Tweets Data Pipeline.
+The Pipeline grabs tweets in real time and publishes them to PubSub.
+Then, the tweets are processed using Google Cloud Dataflow and saved BigQuery.
+
+![Buffer Tweets Pipeline](https://user-images.githubusercontent.com/1682202/43895537-fb295570-9bd5-11e8-91e3-cf8a6b62392d.png)
 
 ## Usage
 
