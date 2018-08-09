@@ -1,6 +1,6 @@
-# buda-buffer-tweets-pipeline crawler
+# Buffer Tweets Crawler
 
-The crawler is a standalone application that uses the Twitter streaming API to pull data from Twitter and publishes it PubSub.
+The crawler is a standalone application that uses the Twitter streaming API to pull some data from Twitter and publishes it PubSub.
 
 ## Setup
 
