@@ -1,0 +1,40 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: buda-buffer-tweets-pipeline-crawler
+  labels:
+    app: buda-buffer-tweets-pipeline-crawler
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: buda-buffer-tweets-pipeline-crawler
+    spec:
+      containers:
+      - image: gcr.io/buffer-data/buda-buffer-tweets-pipeline-crawler:latest
+        name: crawler
+        env:
+        - name: CONSUMER_KEY
+          valueFrom:
+            secretKeyRef:
+              name: twitter
+              key: consumer-key
+        - name: CONSUMER_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: twitter
+              key: consumer-secret
+
+        - name: ACCESS_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: twitter
+              key: access-token
+
+        - name: ACCESS_TOKEN_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: twitter
+              key: access-token-secret
+

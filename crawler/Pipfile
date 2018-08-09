@@ -6,13 +6,14 @@ name = "pypi"
 [packages]
 tweepy = "*"
 google-cloud-pubsub = "*"
-textblob = "*"
 boltons = "*"
-bigquery-schema-generator = "*"
 "e1839a8" = {path = ".", editable = true}
 
 [dev-packages]
 ipython = "*"
+bigquery-schema-generator = "*"
+click = "*"
+pyaml = "*"
 
 [requires]
 python_version = "3.6"

@@ -1,33 +1,58 @@
 .DEFAULT_GOAL := help
 
-IMAGE_NAME := data.buffer.com/buda-buffer-tweets-pipeline
+IMAGE_NAME := buda-buffer-tweets-pipeline-crawler
+GCP_PROJECT=buffer-data
+GKE_CLUSTER=apollo
+COMPUTE_ZONE=us-central1-a
+
+PIP := $(shell command -v pip 2> /dev/null)
+PIPENV := $(shell command -v pipenv 2> /dev/null)
+DOCKER := $(shell command -v docker 2> /dev/null)
+GCLOUD := $(shell command -v gcloud 2> /dev/null)
 
 .PHONY: help
 help:
 	@echo -e "Usage: \tmake [TARGET]\n"
 	@echo -e "Targets:"
 	@echo -e "  deps            Installs and checks for dependencies (Pipenv)"
-	@echo -e "  init            Initialize the Python enviroment, make sure to run this before using make run"
+	@echo -e "  setup           Initialize the dev enviroment, make sure to run this before using make run"
 	@echo -e "  run             Execute the crawler locally"
 	@echo -e "  console         Open a IPython console for testing and development"
-	@echo -e "  image           Build crawler Docker image"
+	@echo -e "  patch           Bump the VERSION file to a new patch version"
+	@echo -e "  minor           Bump the VERSION file to a new minor version"
+	@echo -e "  major           Bump the VERSION file to a new major version"
+	@echo -e "  image           Build crawler Docker images"
 	@echo -e "  rund            Execute the crawler in a Docker container"
 	@echo -e "  push            Push crawler Docker image to the registry"
 	@echo -e "  deploy          Deploy the crawler to Kubernetes"
 	@echo -e "  logs            Display the logs of the running Kubernetes application"
 
+
 .PHONY: deps
 deps:
-	@pip install pipenv
-	@docker -v
+	@echo "Checking dependencies"
+ifndef PIP
+    $(error "pip is not available please install it!")
+endif
+ifndef PIPENV
+    $(error "pipenv is not available please install it!")
+endif
+ifndef DOCKER
+    $(error "Docker is not available please install it!")
+endif
+ifndef GCLOUD
+    $(error "The gcloud cli is not available please install it!")
+endif
+	@echo "All dependencies installed"
 
-.PHONY: init
-init: deps
+.PHONY: setup
+setup: deps
 	@pipenv install --dev
+	@gcloud auth configure-docker
 
 .PHONY: run
 run:
-	@pipenv run python ./crawler.py
+	@pipenv run crawler
 
 .PHONY: console
 console:
@@ -35,20 +60,26 @@ console:
 
 .PHONY: image
 image:
-	@docker build -t $(IMAGE_NAME) .
+	@docker build -t $(IMAGE_NAME):latest .
 
-.PHONY: rund
-rund: image
-	docker run --env-file .env --rm $(IMAGE_NAME)
+.PHONY: patch
+patch:
+	@docker run --rm -v "$(PWD)":/app treeder/bump patch
+	@version=`cat VERSION`
 
-.PHONY: push
-push: image
-	@echo TODO
+.PHONY: run-image
+run-image: image
+	docker run --env-file .env -v ~/.config/gcloud:/root/.config/gcloud --rm $(IMAGE_NAME)
 
+
+.PHONY: secrets
+secrets:
+	@pipenv run ./kube/make_secrets.py | kubectl apply -f -
 
 .PHONY: deploy
-deploy: push secrets
-	@echo TODO
+deploy:
+	@gcloud builds submit --config cloudbuild.yaml . \
+		--substitutions=_IMAGE_NAME=$(IMAGE_NAME),_VERSION=$(shell cat VERSION),_CLUSTER=$(GKE_CLUSTER),_COMPUTE_ZONE=$(COMPUTE_ZONE)
 
 .PHONY: logs
 logs:

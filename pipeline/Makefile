@@ -1,22 +1,35 @@
 .DEFAULT_GOAL := help
 
+PIP := $(shell command -v pip 2> /dev/null)
+PIPENV := $(shell command -v pipenv 2> /dev/null)
+GCLOUD := $(shell command -v gcloud 2> /dev/null)
+
 .PHONY: help
 help:
 	@echo -e "Usage: \tmake [TARGET]\n"
 	@echo -e "Targets:"
-	@echo -e "  deps            Installs and checks for dependencies (Pipenv)"
-	@echo -e "  init            Initialize the Python enviroment, make sure to run this before using make run"
+	@echo -e "  deps            Installs and checks for dependencies (Pipenv, gcloud)"
+	@echo -e "  setup           Initialize the dev enviroment, make sure to run this before using make run"
 	@echo -e "  run             Execute the pipeline locally"
 	@echo -e "  console         Open a IPython console for testing and development"
 	@echo -e "  deploy          Deploy the pipline to GCP"
 
 .PHONY: deps
 deps:
-	@pip install pipenv
-	@docker -v
+	@echo "Checking dependencies"
+ifndef PIP
+    $(error "pip is not available please install it!")
+endif
+ifndef PIPENV
+    $(error "pipenv is not available please install it!")
+endif
+ifndef GCLOUD
+    $(error "The gcloud cli is not available please install it!")
+endif
+	@echo "All dependencies installed"
 
-.PHONY: init
-init: deps
+.PHONY: setup
+setup: deps
 	@pipenv install --dev
 
 .PHONY: run
